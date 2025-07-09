@@ -1,0 +1,32 @@
+import streamlit as st
+import pandas as pd
+
+# 데이터 불러오기
+df = pd.read_csv('cars.csv')
+
+st.title("20대 사회 초년생을 위한 자동차 추천")
+
+# 가격 필터 (만원 단위)
+price_min, price_max = int(df['price_k'].min()), int(df['price_k'].max())
+selected_price = st.slider('예산 (만원)', price_min, price_max, (price_min, price_max))
+
+# 브랜드 필터 (복수 선택 가능)
+brands = df['brand'].unique()
+selected_brands = st.multiselect('선호하는 브랜드 선택', brands, default=list(brands))
+
+# 외형(차종) 필터
+body_types = df['body_type'].unique()
+selected_body_types = st.multiselect('선호하는 외형 선택', body_types, default=list(body_types))
+
+# 필터 적용
+filtered_df = df[
+    (df['price_k'] >= selected_price[0]) &
+    (df['price_k'] <= selected_price[1]) &
+    (df['brand'].isin(selected_brands)) &
+    (df['body_type'].isin(selected_body_types))
+]
+
+st.write(f"총 {len(filtered_df)}개의 자동차가 검색되었습니다.")
+
+# 결과 테이블
+st.dataframe(filtered_df[['brand', 'model', 'price_k', 'body_type', 'fuel_efficiency_km_l', 'description']])
